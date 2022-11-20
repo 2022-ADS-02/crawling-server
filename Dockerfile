@@ -7,6 +7,6 @@ RUN apt-get update
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-EXPOSE 7000
+EXPOSE 7001
 
-CMD ["uvicorn", "--host", "0.0.0.0", "--port", "7000", "main:app"]
+CMD ["python", "main.py"]

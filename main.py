@@ -1,15 +1,19 @@
 import requests
 from bs4 import BeautifulSoup
-import uvicorn
-from fastapi import FastAPI
+from flask import Flask
+import py_eureka_client.eureka_client as eureka_client
 
 base_url = 'https://www.acmicpc.net/problem/'
 
-app = FastAPI()
+eureka_client.init(eureka_server="http://172.17.0.1:8761/eureka",
+                   app_name="search-service",
+                   instance_port=7001)
 
+app = Flask(__name__)
 
-@app.get("/search/{number}")
-async def get_problem_info(number: str):
+# @app.get("/search/{number}")
+@app.route("/search/<number>", methods=["GET"])
+def get_problem_info(number: str):
     url = base_url + number
     response = requests.get(url)
     response.raise_for_status()  # OK 아닌 경우 오류
@@ -33,4 +37,4 @@ async def get_problem_info(number: str):
 
 
 if __name__ == '__main__':
-    uvicorn.run("main:app", port=7000, reload=True)
+    app.run(host="0.0.0.0", port=7001)

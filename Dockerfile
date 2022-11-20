@@ -9,4 +9,6 @@ RUN pip install -r requirements.txt
 
 EXPOSE 7001
 
+ENV TZ Asia/Seoul
+
 CMD ["python", "main.py"]

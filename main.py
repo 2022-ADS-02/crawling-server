@@ -7,6 +7,7 @@ base_url = 'https://www.acmicpc.net/problem/'
 
 eureka_client.init(eureka_server="http://172.17.0.1:8761/eureka",
                    app_name="search-service",
+                   instance_host="http://172.17.0.1",
                    instance_port=7001)
 
 app = Flask(__name__)

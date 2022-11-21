@@ -38,7 +38,7 @@ jobs:
         with:
           builder: ${{ steps.buildx.outputs.name }}
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}
+          tags: ${{ env.DOCKER_IMAGE }}
 
   deploy:
     needs: build
@@ -54,4 +54,4 @@ jobs:
       - name: Docker run
         run: |
           docker stop ${{ env.CONTAINER_NAME }} && docker rm ${{ env.CONTAINER_NAME }} && docker rmi ${{ env.DOCKER_IMAGE }}
-          docker run -d -p ${{ env.PORT }}:${{ env.PORT }} --name ${{ env.CONTAINER_NAME }} --restart always ${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}
+          docker run -d -p ${{ env.PORT }}:${{ env.PORT }} --name ${{ env.CONTAINER_NAME }} --restart always ${{ env.DOCKER_IMAGE }}

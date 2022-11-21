@@ -16,59 +16,29 @@ jobs:
     steps:
       - name: Check out source code
         uses: actions/checkout@v2
-        
       - name: Set up docker buildx
         id: buildx
         uses: docker/setup-buildx-action@v1
       - name: Cache docker layers
         uses: actions/cache@v2
         with:
-          path: .
+          path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ env.VERSION }} # runner 설정에서 읽어들일거에요.
           restore-keys: |
             ${{ runner.os }}-buildx-
-            
       - name: Login to ghcr
         uses: docker/login-action@v1
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR }}
-        
-      - name: Set up JDK 11
-        uses: actions/setup-java@v3
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v2
         with:
-          java-version: '11'
-          distribution: 'temurin'
-
-      - name: Gradle Caching
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      - name: Build with Gradle
-        run: ./gradlew build
-        
-#       - name: Build and push
-#         id: docker_build
-#         uses: docker/build-push-action@v2
-#         with:
-#           builder: ${{ steps.buildx.outputs.name }}
-#           push: ${{ github.event_name != 'pull_request' }}
-#           tags: ${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}
-#           build-args: DEPENDENCY=build/dependency
-          
-      - name: Docker Build
-        run: |
-          docker build --build-arg DEPENDENCY=build/dependency -t ${{ env.DOCKER_IMAGE }}:${{ env.VERSION }} . 
-          docker push ${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}
+          builder: ${{ steps.buildx.outputs.name }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}
 
   deploy:
     needs: build

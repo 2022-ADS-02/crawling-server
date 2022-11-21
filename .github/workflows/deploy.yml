@@ -1,0 +1,87 @@
+name: CI/CD Docker
+
+on:
+  push:
+    branches: [ main, master, develop ] # push할 때 동작할 branch를 입력해주세요.
+env:
+  DOCKER_IMAGE: ghcr.io/${{ github.actor }}/api-gateway # 예를 들면, ghcr.io/dolphago/github-follow-unfollow
+  VERSION: ${{ github.sha }}
+  CONTAINER_NAME: gorae-api-gateway
+  PORT: 7001
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source code
+        uses: actions/checkout@v2
+        
+      - name: Set up docker buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Cache docker layers
+        uses: actions/cache@v2
+        with:
+          path: .
+          key: ${{ runner.os }}-buildx-${{ env.VERSION }} # runner 설정에서 읽어들일거에요.
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+            
+      - name: Login to ghcr
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR }}
+        
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Gradle Caching
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+        
+#       - name: Build and push
+#         id: docker_build
+#         uses: docker/build-push-action@v2
+#         with:
+#           builder: ${{ steps.buildx.outputs.name }}
+#           push: ${{ github.event_name != 'pull_request' }}
+#           tags: ${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}
+#           build-args: DEPENDENCY=build/dependency
+          
+      - name: Docker Build
+        run: |
+          docker build --build-arg DEPENDENCY=build/dependency -t ${{ env.DOCKER_IMAGE }}:${{ env.VERSION }} . 
+          docker push ${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}
+
+  deploy:
+    needs: build
+    name: Deploy
+    runs-on: [ self-hosted, label-development ]
+    steps:
+      - name: Login to ghcr
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR }}
+      - name: Docker run
+        run: |
+          docker stop ${{ env.CONTAINER_NAME }} && docker rm ${{ env.CONTAINER_NAME }} && docker rmi ${{ env.DOCKER_IMAGE }}
+          docker run -d -p ${{ env.PORT }}:${{ env.PORT }} --name ${{ env.CONTAINER_NAME }} --restart always ${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}

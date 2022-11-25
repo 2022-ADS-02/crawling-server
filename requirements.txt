@@ -33,3 +33,5 @@ watchfiles
 websockets
 Flask~=2.2.2
 py-eureka-client
+gunicorn[gevent]
+nest_asyncio

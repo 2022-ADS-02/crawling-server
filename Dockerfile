@@ -11,4 +11,4 @@ EXPOSE 7001
 
 ENV TZ Asia/Seoul
 
-CMD ["python", "main.py"]
+CMD ["gunicorn","--threads","4","--worker-class","gevent","--bind","0.0.0.0:7001","main:app"]

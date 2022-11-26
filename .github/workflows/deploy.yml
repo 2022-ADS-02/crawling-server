@@ -55,3 +55,5 @@ jobs:
         run: |
           docker stop ${{ env.CONTAINER_NAME }} && docker rm ${{ env.CONTAINER_NAME }} && docker rmi ${{ env.DOCKER_IMAGE }}
           docker run -d -p ${{ env.PORT }}:${{ env.PORT }} --name ${{ env.CONTAINER_NAME }} --restart always ${{ env.DOCKER_IMAGE }}
+          docker network ls|grep my_local_network > /dev/null || docker network create --driver bridge my_local_network
+          docker network connect my_local_network ${{ env.CONTAINER_NAME }}

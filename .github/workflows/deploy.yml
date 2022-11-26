@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main, master, develop ] # push할 때 동작할 branch를 입력해주세요.
 env:
-  DOCKER_IMAGE: ghcr.io/${{ github.actor }}/crawling # 예를 들면, ghcr.io/dolphago/github-follow-unfollow
+  DOCKER_IMAGE: ghcr.io/gorae-online-judge/crawling # 예를 들면, ghcr.io/dolphago/github-follow-unfollow
   VERSION: ${{ github.sha }}
   CONTAINER_NAME: gorae-crawling
   PORT: 7001

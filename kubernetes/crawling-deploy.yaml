@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: gorae-crawling-service
+spec:
+  selector:
+    app: gorae-crawling
+  ports:
+    - protocol: 'TCP'
+      port: 7001
+      targetPort: 7001
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gorae-crawling
+  labels:
+    app:gorae-crawling
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gorae-crawling
+  template:
+    metadata:
+      labels:
+        app: gorae-crawling
+    spec:
+      containers:
+        - name: gorae-crawling
+          image: lifetwoshot/gorae-crawling:latest
+          imagePullPolicy: Always
+          env:
+            - name: CRAWLING_ADDRESS
+              value: "gorae-crawling-service.default"
+            - name: EUREKA_ADDRESS
+              value: "gorae-eureka-service.default"

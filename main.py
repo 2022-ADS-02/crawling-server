@@ -15,8 +15,8 @@ db_user = "gorae"
 db_password="gorae"
 db_name="gorae_online_judge"
 
-conn = pymysql.connect(host="52.79.131.254", port=3306,
-                       user="gorae", password="gorae", db="gorae_online_judge",
+conn = pymysql.connect(host=db_host, port=3306,
+                       user=db_user, password=db_password, db=db_name,
                        charset="utf8", cursorclass=pymysql.cursors.DictCursor)
 curs = conn.cursor()
 

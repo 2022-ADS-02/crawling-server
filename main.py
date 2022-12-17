@@ -37,7 +37,7 @@ def get_problem_info(number: str):
     return crawl(number)
 
 def crawl(prlblem_id):
-    url = boj_url + 'problem/' + number
+    url = boj_url + 'problem/' + prlblem_id
     response = requests.get(url)
     response.raise_for_status()  # OK 아닌 경우 오류
     soup = BeautifulSoup(response.text, "lxml")

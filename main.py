@@ -1,3 +1,4 @@
+import pymysql
 import requests
 from bs4 import BeautifulSoup
 from flask import Flask, request
@@ -9,6 +10,16 @@ nest_asyncio.apply()
 boj_url = 'https://www.acmicpc.net/'
 language_numbers = {'Python': '28', 'Java': '93'}  # jdk 11
 
+db_host = "52.79.131.254"
+db_user = "gorae"
+db_password="gorae"
+db_name="gorae_online_judge"
+
+conn = pymysql.connect(host="52.79.131.254", port=3306,
+                       user="gorae", password="gorae", db="gorae_online_judge",
+                       charset="utf8", cursorclass=pymysql.cursors.DictCursor)
+curs = conn.cursor()
+
 # eureka_client.init(eureka_server="http://172.17.0.1:8761/eureka",
 #                    app_name="search-service",
 #                    instance_host="172.17.0.1",
@@ -19,6 +30,13 @@ app = Flask(__name__)
 
 @app.route("/search/<number>", methods=["GET"])
 def get_problem_info(number: str):
+    # 먼저 db 체크
+    if exists(number):
+        return search_db(number)
+
+    return crawl(number)
+
+def crawl(prlblem_id):
     url = boj_url + 'problem/' + number
     response = requests.get(url)
     response.raise_for_status()  # OK 아닌 경우 오류
@@ -37,8 +55,11 @@ def get_problem_info(number: str):
         sample_output_text = soup.find('pre', attrs={"id": "sample-output-" + str(i)}).text
         samples_text.append({"input": str(sample_input_text), "output": str(sample_output_text)})
         i += 1
-    return {"problem_description": str(problem_description), "problem_input": str(problem_input),
-            "problem_output": str(problem_output), "samples": samples, "samples_text": samples_text}
+
+    crawling_result = {"problem_description": str(problem_description), "problem_input": str(problem_input),
+                       "problem_output": str(problem_output), "samples": samples, "samples_text": samples_text}
+    save_result(prlblem_id, crawling_result)
+    return crawling_result
 
 '''
 {
@@ -125,6 +146,61 @@ def submitCodeToBoj(number: str):
             print(judge_result)
             break
     return {"success": success, "result": judge_result}
+
+
+def save_result(problem_id, result):
+    sql = "insert into problems(problem_id, problem_description, problem_input, problem_output) " \
+          "values(%s, %s, %s, %s)"
+    values = (int(problem_id), result["problem_description"],
+              result["problem_input"], result["problem_output"])
+    curs.execute(sql, values)
+
+    sql = "insert into samples(problem_id, input, output) " \
+          "values(%s, %s, %s)"
+    values = []
+    for sample in result["samples"]:
+        values.append((int(problem_id), sample["input"], sample["output"]))
+    curs.executemany(sql, values)
+
+    sql = "insert into samples_text(problem_id, input, output) " \
+          "values(%s, %s, %s)"
+    values = []
+    for sample in result["samples_text"]:
+        values.append((int(problem_id), sample["input"], sample["output"]))
+    curs.executemany(sql, values)
+
+    conn.commit()
+
+
+def exists(problem_id):
+    sql = "select exists(select * from problems where problem_id = {}) as result" .format(problem_id)
+    curs.execute(sql)
+    result = curs.fetchone()
+    return result["result"]
+
+
+def search_db(problem_id: str):
+    crawling_result = {"samples": [], "samples_text": []}
+    sql = "select * from problems where problem_id = {}" .format(problem_id)
+    curs.execute(sql)
+    problem = curs.fetchone()
+    if problem:
+        crawling_result["problem_description"] = problem["problem_description"]
+        crawling_result["problem_input"] = problem["problem_input"]
+        crawling_result["problem_output"] = problem["problem_output"]
+
+    sql = "select s.input as s_input, s.output as s_output, st.input as st_input, st.output as st_output " \
+          "from samples s, samples_text st " \
+          "where s.problem_id = st.problem_id " \
+          "and s.problem_id = {}" .format(problem_id)
+    curs.execute(sql)
+    samples = curs.fetchone()
+    while samples:
+        crawling_result["samples"].append({"input": samples["s_input"], "output": samples["s_output"]})
+        crawling_result["samples_text"].append({"input": samples["st_input"], "output": samples["st_output"]})
+        samples = curs.fetchone()
+
+    return crawling_result
 
 
 if __name__ == '__main__':

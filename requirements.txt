@@ -35,3 +35,6 @@ Flask~=2.2.2
 py-eureka-client
 gunicorn[gevent]
 nest_asyncio
+nest_asyncio
+pymysql
+cryptography

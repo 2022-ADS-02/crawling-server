@@ -1,5 +1,6 @@
 import pymysql
 import yaml
+from os import environ
 import requests
 from bs4 import BeautifulSoup
 from flask import Flask, request
@@ -23,9 +24,9 @@ conn = pymysql.connect(host=db_host, port=3306,
                        charset="utf8", cursorclass=pymysql.cursors.DictCursor)
 curs = conn.cursor()
 
-# eureka_client.init(eureka_server="http://172.17.0.1:8761/eureka",
-#                    app_name="search-service",
-#                    instance_host="172.17.0.1",
+# eureka_client.init(eureka_server="{}:8761/eureka" .format(environ.get("EUREKA_ADDRESS", "192.168.2.11")),
+#                    app_name="judge-service",
+#                    instance_host=environ.get("CRAWLING_ADDRESS", "192.168.2.14"),
 #                    instance_port=7001)
 
 app = Flask(__name__)

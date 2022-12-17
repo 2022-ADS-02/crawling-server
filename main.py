@@ -1,4 +1,5 @@
 import pymysql
+import os
 import requests
 from bs4 import BeautifulSoup
 from flask import Flask, request
@@ -10,10 +11,10 @@ nest_asyncio.apply()
 boj_url = 'https://www.acmicpc.net/'
 language_numbers = {'Python': '28', 'Java': '93'}  # jdk 11
 
-db_host = "52.79.131.254"
-db_user = "gorae"
-db_password="gorae"
-db_name="gorae_online_judge"
+db_host = os.environ["DB_HOST"]
+db_user = os.environ["DB_USER"]
+db_password = os.environ["DB_PASSWORD"]
+db_name = os.environ["DB_NAME"]
 
 conn = pymysql.connect(host=db_host, port=3306,
                        user=db_user, password=db_password, db=db_name,

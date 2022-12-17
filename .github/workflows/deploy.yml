@@ -46,6 +46,12 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ env.DOCKER_IMAGE }}
 
+      - name: Docker image push to lifetwoshot
+        run: |
+          docker login -u ${{ secrets.KYU_USERNAME }} -p ${{ secrets.KYU_PASSWORD }}
+          docker build lifetwoshot/gorae-crawling . 
+          docker push lifetwoshot/gorae-crawling
+
   deploy:
     needs: build
     name: Deploy

@@ -16,12 +16,12 @@ jobs:
     steps:
       - name: Check out source code
         uses: actions/checkout@v2
-      - name: Env Var setting
-        env:
-          DB_HOST: ${{ secrets.DB_HOST }}
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          DB_NAME: ${{ secrets.DB_NAME }}
+
+      - name: Make db access file
+        run: |
+          mkdir -p ./db
+          touch ./db/access.yaml
+          echo "${{ secrets.ACCESS }}" > ./db/access.yaml
       - name: Set up docker buildx
         id: buildx
         uses: docker/setup-buildx-action@v1
@@ -45,12 +45,6 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ env.DOCKER_IMAGE }}
-
-      - name: Docker image push to lifetwoshot
-        run: |
-          docker login -u ${{ secrets.KYU_USERNAME }} -p ${{ secrets.KYU_PASSWORD }}
-          docker build lifetwoshot/gorae-crawling . 
-          docker push lifetwoshot/gorae-crawling
 
   deploy:
     needs: build

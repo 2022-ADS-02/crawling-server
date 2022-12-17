@@ -1,5 +1,5 @@
 import pymysql
-import os
+import yaml
 import requests
 from bs4 import BeautifulSoup
 from flask import Flask, request
@@ -11,10 +11,12 @@ nest_asyncio.apply()
 boj_url = 'https://www.acmicpc.net/'
 language_numbers = {'Python': '28', 'Java': '93'}  # jdk 11
 
-db_host = os.environ["DB_HOST"]
-db_user = os.environ["DB_USER"]
-db_password = os.environ["DB_PASSWORD"]
-db_name = os.environ["DB_NAME"]
+with open("./db/access.yaml", encoding="UTF-8") as f:
+    cfg = yaml.load(f, Loader=yaml.FullLoader)
+    db_host = cfg["db_host"]
+    db_user = cfg["db_user"]
+    db_password = cfg["db_password"]
+    db_name = cfg["db_name"]
 
 conn = pymysql.connect(host=db_host, port=3306,
                        user=db_user, password=db_password, db=db_name,

@@ -25,7 +25,7 @@ conn = pymysql.connect(host=db_host, port=3306,
 curs = conn.cursor()
 
 eureka_client.init(eureka_server="{}:8761/eureka" .format(environ.get("EUREKA_ADDRESS", "192.168.2.11")),
-                   app_name="crawling-service",
+                   app_name="SEARCH_SERVICE",
                    instance_host=environ.get("CRAWLING_ADDRESS", "192.168.2.14"),
                    instance_port=7001)
 

@@ -5,6 +5,7 @@ from os import environ
 import requests
 from bs4 import BeautifulSoup
 from flask import Flask, request
+from flask_cors import CORS
 import py_eureka_client.eureka_client as eureka_client
 import time
 import nest_asyncio
@@ -25,7 +26,6 @@ with open("./auth/token.yaml", encoding="UTF-8") as f:
     cfg = yaml.load(f, Loader=yaml.FullLoader)
     access_key = cfg["jwt"]["secret"]["access"]
 
-
 # conn = pymysql.connect(host=db_host, port=3306,
 #                        user=db_user, password=db_password, db=db_name,
 #                        charset="utf8", cursorclass=pymysql.cursors.DictCursor)
@@ -37,6 +37,7 @@ eureka_client.init(eureka_server="{}:8761/eureka" .format(environ.get("EUREKA_AD
                    instance_port=7001)
 
 app = Flask(__name__)
+CORS(app, resources={r"/search/*": {"origins": "*"}})
 
 
 @app.route("/search/<number>", methods=["GET"])
@@ -82,6 +83,8 @@ def crawl(prlblem_id):
     "source":"a,b = map(int, input().split())\nprint(a+b)"
 }
 '''
+
+
 @app.route("/search/submit/<number>", methods=['POST'])
 def submitCodeToBoj(number: str):
     if 'Authorization' not in request.headers:
@@ -143,7 +146,7 @@ def submitCodeToBoj(number: str):
             break
     print(submitted_number)
     if submitted_number == "":
-        return "백준 아이디와 동일한 아이디가 아닙니다.", 401
+        return "백준 아이디와 동일한 아이디가 아닙니다.", 404
 
     success = False
     judge_result = ""
@@ -154,7 +157,7 @@ def submitCodeToBoj(number: str):
         row = soup.find('tr', attrs={"id": "solution-" + submitted_number})
         result = row.find('span', attrs={"class": "result-text"})
         result_attrs = result.attrs
-        if 'result-compile' in result_attrs['class'] or 'result-judging' in result_attrs['class']:
+        if 'result-compile' in result_attrs['class'] or 'result-judging' in result_attrs['class'] or 'result-wait' in result_attrs['class']:
             print('채점 중')
             time.sleep(3)
             continue

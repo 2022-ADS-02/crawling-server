@@ -38,3 +38,4 @@ nest_asyncio
 pymysql
 cryptography
 PyJWT
+flask_cors

@@ -75,6 +75,9 @@ def crawl(prlblem_id):
 '''
 @app.route("/search/submit/<number>", methods=['POST'])
 def submitCodeToBoj(number: str):
+    if 'id' not in request.headers or 'bojToken' not in request.headers:
+        return "토큰을 확인해주세요", 401
+
     req = request.get_json()
 
     headers_dict = {
@@ -82,8 +85,10 @@ def submitCodeToBoj(number: str):
     }
     response = requests.get('https://www.acmicpc.net', headers=headers_dict)
 
+
+
     cookies_dict = {
-        'bojautologin': req['boj_autologin'],
+        'bojautologin': request.headers['bojToken'],
         'OnlineJudge': response.cookies.get_dict()['OnlineJudge']
     }
 
@@ -114,7 +119,7 @@ def submitCodeToBoj(number: str):
     if response.status_code != 200:
         return {"result": "제출에 실패했습니다."}
 
-    url = boj_url + 'status?user_id=' + req['id']
+    url = boj_url + 'status?user_id=' + request.headers['id']
     response = requests.get(url)
     response.raise_for_status()  # OK 아닌 경우 오류
     soup = BeautifulSoup(response.text, "lxml")

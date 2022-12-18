@@ -37,3 +37,4 @@ gunicorn[gevent]
 nest_asyncio
 pymysql
 cryptography
+PyJWT

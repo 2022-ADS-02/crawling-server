@@ -1,0 +1,3 @@
+jwt:
+  secret:
+    access: thisisjwtsecretkeyforgoraeonlinejudge20221218

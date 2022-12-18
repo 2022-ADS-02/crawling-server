@@ -16,7 +16,7 @@ kind: Deployment
 metadata:
   name: gorae-crawling
   labels:
-    app:gorae-crawling
+    app: gorae-crawling
 spec:
   replicas: 1
   selector:

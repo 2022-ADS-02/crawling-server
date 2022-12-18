@@ -24,10 +24,10 @@ conn = pymysql.connect(host=db_host, port=3306,
                        charset="utf8", cursorclass=pymysql.cursors.DictCursor)
 curs = conn.cursor()
 
-# eureka_client.init(eureka_server="{}:8761/eureka" .format(environ.get("EUREKA_ADDRESS", "192.168.2.11")),
-#                    app_name="judge-service",
-#                    instance_host=environ.get("CRAWLING_ADDRESS", "192.168.2.14"),
-#                    instance_port=7001)
+eureka_client.init(eureka_server="{}:8761/eureka" .format(environ.get("EUREKA_ADDRESS", "192.168.2.11")),
+                   app_name="judge-service",
+                   instance_host=environ.get("CRAWLING_ADDRESS", "192.168.2.14"),
+                   instance_port=7001)
 
 app = Flask(__name__)
 

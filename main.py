@@ -15,25 +15,25 @@ nest_asyncio.apply()
 boj_url = 'https://www.acmicpc.net/'
 language_numbers = {'Python': '28', 'Java': '93'}  # jdk 11
 
-# with open("./db/access.yaml", encoding="UTF-8") as f:
-#     cfg = yaml.load(f, Loader=yaml.FullLoader)
-#     db_host = cfg["db_host"]
-#     db_user = cfg["db_user"]
-#     db_password = cfg["db_password"]
-#     db_name = cfg["db_name"]
+with open("./db/access.yaml", encoding="UTF-8") as f:
+    cfg = yaml.load(f, Loader=yaml.FullLoader)
+    db_host = cfg["db_host"]
+    db_user = cfg["db_user"]
+    db_password = cfg["db_password"]
+    db_name = cfg["db_name"]
 
 with open("./auth/token.yaml", encoding="UTF-8") as f:
     cfg = yaml.load(f, Loader=yaml.FullLoader)
     access_key = cfg["jwt"]["secret"]["access"]
 
-# conn = pymysql.connect(host=db_host, port=3306,
-#                        user=db_user, password=db_password, db=db_name,
-#                        charset="utf8", cursorclass=pymysql.cursors.DictCursor)
-# curs = conn.cursor()
+conn = pymysql.connect(host=db_host, port=3306,
+                       user=db_user, password=db_password, db=db_name,
+                       charset="utf8", cursorclass=pymysql.cursors.DictCursor)
+curs = conn.cursor()
 
-eureka_client.init(eureka_server="{}:8761/eureka" .format(environ.get("EUREKA_ADDRESS", "192.168.2.11")),
+eureka_client.init(eureka_server="{}:8761/eureka" .format(environ.get("EUREKA_ADDRESS")),
                    app_name="crawling-service",
-                   instance_host=environ.get("CRAWLING_ADDRESS", "192.168.2.14"),
+                   instance_host=environ.get("CRAWLING_ADDRESS"),
                    instance_port=7001)
 
 app = Flask(__name__)
